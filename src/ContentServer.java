@@ -2,33 +2,59 @@ import java.io.*;
 import java.net.*;
 import java.util.concurrent.TimeUnit;
 
-
-public class ContentServer {
-    private static final String SERVER_HOST = "127.0.0.1";
-    private static final int SERVER_PORT = 4567;
-    private static final String DATA_FILE = "weather_data.txt";
+public class ContentServer extends JsonUtils {
+    private String serverHost;
+    private int serverPort;
+    private String dataFile;
     private LamportClock lamportClock = new LamportClock();
     private static final int POLLING_INTERVAL = 5000;
     private long lastModifiedTime = -1;
 
-    public static void main(String[] args) {
-        new ContentServer().start();
+    public ContentServer(String serverHost, int serverPort, String dataFile) {
+        this.serverHost = serverHost;
+        this.serverPort = serverPort;
+        this.dataFile = dataFile;
     }
 
+    public static void main(String[] args) {
+        if (args.length != 2) {
+            System.err.println("Usage: java ContentServer <serverHost:port> <dataFile>");
+            return;
+        }
+
+        String[] serverInfo = args[0].split(":");
+        if (serverInfo.length != 2) {
+            System.err.println("Error: Server information should be in the format <serverHost:port>");
+            return;
+        }
+
+        String serverHost = serverInfo[0];
+        int serverPort;
+        try {
+            serverPort = Integer.parseInt(serverInfo[1]);
+        } catch (NumberFormatException e) {
+            System.err.println("Error: Port number must be an integer.");
+            return;
+        }
+
+        String dataFile = args[1];
+
+        new ContentServer(serverHost, serverPort, dataFile).start();
+    }
 
     public void start() {
-
         sendWeatherData();
-        File file = new File(DATA_FILE);
+
+        File file = new File(dataFile);
         if (!file.exists()) {
-            System.err.println("Error: File " + DATA_FILE + " does not exist.");
+            System.err.println("Error: File " + dataFile + " does not exist.");
             return;
         }
         lastModifiedTime = file.lastModified();
 
         while (true) {
             try {
-                File currentFile = new File(DATA_FILE);
+                File currentFile = new File(dataFile);
                 if (currentFile.lastModified() != lastModifiedTime) {
                     lastModifiedTime = currentFile.lastModified();
                     sendWeatherData();
@@ -41,52 +67,32 @@ public class ContentServer {
             }
         }
     }
-    
 
     public void sendWeatherData() {
-        try (  //Socket socket = new Socket(SERVER_HOST, SERVER_PORT);
-             BufferedReader fileReader = new BufferedReader(new FileReader(DATA_FILE));
+        try (   //Socket socket = new Socket(serverHost, serverPort);
+             BufferedReader fileReader = new BufferedReader(new FileReader(dataFile));
              //PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
              //BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))
              ) {
 
             // Read weather data from file and format it as JSON
-            StringBuilder jsonData = new StringBuilder();
-            jsonData.append("{\n");
+            String jsonString = parseFileToJson(fileReader);
 
-            String line;
-            boolean first = true;
-            while ((line = fileReader.readLine()) != null) {
-                if (!first) {
-                    jsonData.append(",\n");
-                }
-                first = false;
-
-                // Format each line as a JSON key-value pair
-                String[] parts = line.split(":", 2);
-                if (parts.length == 2) {
-                    String key = parts[0].trim();
-                    String value = parts[1].trim();
-                    jsonData.append(String.format("\"%s\": \"%s\"", key, value));
-                }
-            }
-
-            jsonData.append("\n}");
-            String jsonString = jsonData.toString();
+            
 
             // Prepare request headers
             String requestLine = "PUT /weather.json HTTP/1.1";
             String userAgent = "User-Agent: ATOMClient/1/0";
             String contentType = "Content-Type: application/json";
             String contentLength = "Content-Length: " + jsonString.length();
-            String Lamportvalue= "Lamport-Time: " +lamportClock.tick();
+            String lamportValue = "Lamport-Time: " + lamportClock.tick();
 
             // Send PUT request
             System.out.println(requestLine);
             System.out.println(userAgent);
             System.out.println(contentType);
             System.out.println(contentLength);
-            System.out.println(Lamportvalue);
+            System.out.println(lamportValue);
             System.out.println(); // Blank line to end headers
             System.out.println(jsonString); // Send JSON data
             System.out.println(); // End of data

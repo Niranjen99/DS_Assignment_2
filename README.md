@@ -28,4 +28,4 @@ If the client fails to connect to the server, it will automatically retry every 
 
 Acknowledgments
 
-I would like to acknowledge the use of generative AI (ChatGPT) in modifying and improving the data cleaning functions,  server recovery functions and JSON util functions for this assignment. The assistance provided helped in enhancing the overall functionality and efficiency of the code.
+I would like to acknowledge the use of generative AI (ChatGPT) in modifying and improving the data cleaning functions,  server recovery functions and making my own JSON parsers (JsonUtils.java) for this assignment. The assistance provided helped in enhancing the overall functionality and efficiency of the code.

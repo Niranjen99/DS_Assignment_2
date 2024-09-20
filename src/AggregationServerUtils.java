@@ -79,7 +79,9 @@ public class AggregationServerUtils extends Thread {
                 try {
                     Map<String, String> json = JsonUtils.parseJSON(dataMap.get("Data"));
                     String fileName = json.get("id") + ".json";
+                    //Writing to temp .json file rather than mainDatafile.data
                     FileUtils.writeToTempFile(fileName, JsonUtils.stringifyJson(json));
+                    //Writing to main file
                     short code = handlePUTRequest(fileName);
                     FileUtils.deleteTempFile(fileName);
                     switch (code) {

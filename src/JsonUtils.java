@@ -2,7 +2,22 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * The JsonUtils class provides utility methods for parsing and converting data
+ * between JSON format and text files. It includes methods to parse a file into JSON,
+ * parse a JSON string into a map, and convert a map back into a JSON string.
+ */
 public class JsonUtils {
+    
+    
+    /**
+     * Reads the specified text file and converts its content into a JSON string format.
+     * The file is expected to contain key-value pairs separated by a colon.
+     *
+     * @param file The path to the file to be parsed into JSON.
+     * @return A JSON-formatted string representation of the file content.
+     * @throws IOException If an I/O error occurs while reading the file.
+     */
     public static String parseFileToJson(String file) throws IOException {
         BufferedReader fileReader = new BufferedReader(new FileReader(file));
         StringBuilder jsonData = new StringBuilder();
@@ -26,6 +41,14 @@ public class JsonUtils {
         return jsonData.toString();
     }
 
+     /**
+     * Parses a JSON-formatted string and converts it into a map of key-value pairs.
+     * This method validates the JSON structure and handles string values enclosed in quotes.
+     *
+     * @param jsonString The JSON string to be parsed.
+     * @return A map containing the parsed key-value pairs from the JSON string.
+     * @throws Exception If the JSON string is not properly formatted.
+     */
     public static Map<String, String> parseJSON(String jsonString) throws Exception {
         jsonString = jsonString.trim();
         if (!jsonString.startsWith("{") || !jsonString.endsWith("}")) {
@@ -46,6 +69,13 @@ public class JsonUtils {
         return jsonMap;
     }
 
+    /**
+     * Parses a string value by removing the enclosing double quotes.
+     *
+     * @param value The string value to be parsed.
+     * @return The unquoted string value.
+     * @throws Exception If the value is not enclosed in double quotes.
+     */
     private static String parseString(String value) throws Exception {
         if (value.startsWith("\"") && value.endsWith("\"")) {
             return value.substring(1, value.length() - 1);
@@ -53,6 +83,13 @@ public class JsonUtils {
         throw new Exception("Invalid JSON format: Expected string value.");
     }
 
+    /**
+     * Converts a map of key-value pairs into a JSON-formatted string.
+     * The keys and string values are enclosed in double quotes.
+     *
+     * @param map The map containing key-value pairs to be converted into a JSON string.
+     * @return A JSON-formatted string representation of the map.
+     */
     public static String stringifyJson(Map<String, String> map) {
         StringBuilder jsonBuilder = new StringBuilder();
         jsonBuilder.append("{");

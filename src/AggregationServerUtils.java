@@ -75,7 +75,7 @@ public class AggregationServerUtils extends Thread {
             writer.println("Lamport-Time: " + lamportClock.tick()); 
             // Process request based on method and endpoint
             if ("PUT".equals(method) && "/weather.json".equals(endpoint.split("\\?")[0])) {
-                System.out.println("Handling PUT request!");
+                System.out.println("Handling PUT request..");
                 try {
                     Map<String, String> json = JsonUtils.parseJSON(dataMap.get("Data"));
                     String fileName = json.get("id") + ".json";
@@ -103,7 +103,7 @@ public class AggregationServerUtils extends Thread {
                     writer.println("HTTP/1.1 500 Internal Server Error");
                 }
             } else if ("GET".equals(method) && "/weather.json".equals(endpoint.split("\\?")[0])) {
-                System.out.println("Handling GET request!");
+                System.out.println("Handling GET request..");
                 String[] endpointAndQuery = endpoint.split("\\?");
                 Map<String, String> json = handleGETRequest(endpointAndQuery.length > 1 ? endpointAndQuery[1] : "");
                 if (json != null) {

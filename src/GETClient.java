@@ -41,6 +41,11 @@ public class GETClient {
         reconnectGetWeatherData();
     }
 
+    /**
+     * Continuously attempts to reconnect to the server and retrieve weather data.
+     * If a connection is established, it fetches the weather data by calling the
+     * getWeatherData() method.
+     */
     private static void reconnectGetWeatherData() {
         boolean success = false;
         while (!success) {
@@ -65,9 +70,13 @@ public class GETClient {
         }
     }
 
+    /**
+     * Sends an HTTP GET request to the server to retrieve weather data in JSON format.
+     * The response is parsed and displayed, and the Lamport clock is updated.
+     */
     private static void getWeatherData() {
         try {
-            System.out.println("Reading data from server!");
+            System.out.println("Receiving data from server..");
             // Prepare request headers
             String requestLine = "GET /weather.json" + (stationId != null ? "?stationId=" + stationId : "")
                     + " HTTP/1.1";
@@ -99,16 +108,33 @@ public class GETClient {
                     responseCode = responseLine.split(" ")[1];
                 }
             }
-            if (json != null && !json.isEmpty()) {
-                System.out.println("Data:");
+
+            // Define the order of keys to print
+            String[] order = {
+                    "id", "name", "state", "time_zone", "lat", "lon",
+                    "local_date_time", "local_date_time_full", "air_temp",
+                    "apparent_t", "cloud", "dewpt", "press", "rel_hum",
+                    "wind_dir", "wind_spd_kmh", "wind_spd_kt"
+            };
+            /*if (json != null && !json.isEmpty()) {
+                System.out.println(" Weather Data:");
                 for (Map.Entry<String, String> item : json.entrySet()) {
                     System.out.println(item.getKey() + ": " + item.getValue());
+                }
+            }*/
+            // Print JSON data in the specified order
+            if (json != null && !json.isEmpty()) {
+                System.out.println("Weather Data:");
+                for (String key : order) {
+                    if (json.containsKey(key)) {
+                        System.out.println(key + ": " + json.get(key));
+                    }
                 }
             } else {
                 if ("400".equals(responseCode) || "500".equals(responseCode)) {
                     System.out.println("Error occured while processing request!");
                 } else if ("404".equals(responseCode)) {
-                    System.out.println("Data is empty!");
+                    System.out.println("No recorded data in Server");
                 }
             }
             System.out.println("Lamport clock after GET request:" + lamportClock.getTime());

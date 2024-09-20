@@ -20,6 +20,11 @@ public class ContentServerUtils {
         this.dataFile = dataFile;
     }
 
+    /**
+     * Starts the Content Server. It monitors the weather data file at regular intervals and sends the data
+     * to the Aggregation Server whenever the file is modified. The server continues running and attempts to 
+     * reconnect if there are issues with the connection.
+     */
     public void start() {
         File file = new File(dataFile);
         if (!file.exists()) {
@@ -40,6 +45,10 @@ public class ContentServerUtils {
         executorService.scheduleAtFixedRate(task, 0, POLLING_INTERVAL, TimeUnit.SECONDS);
     }
 
+    /**
+     * Attempts to reconnect to the Aggregation Server and send the weather data. 
+     * If the connection fails, it retries after a delay.
+     */
     private void reconnectAndSendWeatherData() {
         boolean success = false;
         while (!success) {
@@ -64,6 +73,12 @@ public class ContentServerUtils {
         }
     }
 
+    /**
+     * Reads the weather data from the file, formats it as JSON, and sends it via a
+     * PUT request
+     * to the Aggregation Server. It also updates the Lamport clock based on the
+     * server's response.
+     */
     private void sendWeatherData() {
         try {
             // Read weather data from file and format it as JSON

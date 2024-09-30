@@ -2,6 +2,8 @@
 
 Dev Notes:
 
+Code was written in visual studio code and junit 4.12 was used for automation testing
+
 How It Works
 
 Aggregation Server: 

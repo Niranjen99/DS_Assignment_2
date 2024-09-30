@@ -11,6 +11,7 @@ public class AggregationServerUtils extends Thread {
     private Socket socket;
     private LamportClock lamportClock;
     private File contentFile;
+    private static final Object lock = new Object();
 
     AggregationServerUtils(Socket socket, LamportClock lamportClock, File conFile) {
         this.socket = socket;
@@ -73,55 +74,57 @@ public class AggregationServerUtils extends Thread {
             lamportClock.update(recievedLamportTime);
             //Sending Lamport time after update
             writer.println("Lamport-Time: " + lamportClock.tick()); 
-            // Process request based on method and endpoint
-            if ("PUT".equals(method) && "/weather.json".equals(endpoint.split("\\?")[0])) {
-                System.out.println("Handling PUT request..");
-                try {
-                    Map<String, String> json = JsonUtils.parseJSON(dataMap.get("Data"));
-                    String fileName = json.get("id") + ".json";
-                    //Writing to temp .json file rather than mainDatafile.data
-                    FileUtils.writeToTempFile(fileName, JsonUtils.stringifyJson(json));
-                    //Writing to main file
-                    short code = handlePUTRequest(fileName);
-                    FileUtils.deleteTempFile(fileName);
-                    switch (code) {
-                        case 0:
-                            // 201 if data is newly added from content server
-                            writer.println("HTTP/1.1 201 Created");
-                            break;
-                        case 1:
-                            // 200 if data already exists and added from content server
-                            writer.println("HTTP/1.1 200 OK");
-                            break;
-                        default:
-                            // 500 if error happens while processing
-                            writer.println("HTTP/1.1 500 Internal Server Error");
-                            break;
+            synchronized (lock) {
+                // Process request based on method and endpoint
+                if ("PUT".equals(method) && "/weather.json".equals(endpoint.split("\\?")[0])) {
+                    System.out.println("Handling PUT request..");
+                    try {
+                        Map<String, String> json = JsonUtils.parseJSON(dataMap.get("Data"));
+                        String fileName = json.get("id") + ".json";
+                        // Writing to temp .json file rather than mainDatafile.data
+                        FileUtils.writeToTempFile(fileName, JsonUtils.stringifyJson(json));
+                        // Writing to main file
+                        short code = handlePUTRequest(fileName);
+                        FileUtils.deleteTempFile(fileName);
+                        switch (code) {
+                            case 0:
+                                // 201 if data is newly added from content server
+                                writer.println("HTTP/1.1 201 Created");
+                                break;
+                            case 1:
+                                // 200 if data already exists and added from content server
+                                writer.println("HTTP/1.1 200 OK");
+                                break;
+                            default:
+                                // 500 if error happens while processing
+                                writer.println("HTTP/1.1 500 Internal Server Error");
+                                break;
+                        }
+                    } catch (Exception e) {
+                        System.out.println("Invalid Json!");
+                        e.printStackTrace();
+                        // 500 if request body (json is invalid)
+                        writer.println("HTTP/1.1 500 Internal Server Error");
                     }
-                } catch (Exception e) {
-                    System.out.println("Invalid Json!");
-                    e.printStackTrace();
-                    // 500 if request body (json is invalid)
-                    writer.println("HTTP/1.1 500 Internal Server Error");
-                }
-            } else if ("GET".equals(method) && "/weather.json".equals(endpoint.split("\\?")[0])) {
-                System.out.println("Handling GET request..");
-                String[] endpointAndQuery = endpoint.split("\\?");
-                Map<String, String> json = handleGETRequest(endpointAndQuery.length > 1 ? endpointAndQuery[1] : "");
-                if (json != null) {
-                    // 200 and json if request is executed correctly
-                    writer.println("HTTP/1.1 200 OK");
-                    writer.println(JsonUtils.stringifyJson(json));
+                } else if ("GET".equals(method) && "/weather.json".equals(endpoint.split("\\?")[0])) {
+                    System.out.println("Handling GET request..");
+                    String[] endpointAndQuery = endpoint.split("\\?");
+                    Map<String, String> json = handleGETRequest(endpointAndQuery.length > 1 ? endpointAndQuery[1] : "");
+                    if (json != null) {
+                        // 200 and json if request is executed correctly
+                        writer.println("HTTP/1.1 200 OK");
+                        writer.println(JsonUtils.stringifyJson(json));
+                    } else {
+                        // 404 if data is empty
+                        writer.println("HTTP/1.1 404 Resource not found");
+                    }
                 } else {
-                    // 404 if data is empty
-                    writer.println("HTTP/1.1 404 Resource not found");
+                    // 400 if method or endpoint is invalid
+                    System.out.println("Request method or endpoint not found!");
+                    writer.println("HTTP/1.1 400 Bad Request");
                 }
-            } else {
-                // 400 if method or endpoint is invalid
-                System.out.println("Request method or endpoint not found!");
-                writer.println("HTTP/1.1 400 Bad Request");
-            }
-            writer.println();
+                writer.println();
+            } // lock released
         } catch (Exception e) {
             System.out.println("Error while reading data from client!");
             e.printStackTrace();

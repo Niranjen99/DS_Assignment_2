@@ -74,6 +74,7 @@ public class AggregationServer {
                             if (idsToRemove.size() > 0) {
                                 System.out.println("Updating file after deletion of outdated data");
                                 FileUtils.writeListToFile(contentDataFile, contentList);
+                                System.out.println("Updated");
                             }
                         } catch (Exception e) {
                             System.out.println("Error Occured while checking for outdated data!");

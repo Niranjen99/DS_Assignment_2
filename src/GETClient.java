@@ -122,6 +122,7 @@ public class GETClient {
                     System.out.println(item.getKey() + ": " + item.getValue());
                 }
             }*/
+            
             // Print JSON data in the specified order
             if (json != null && !json.isEmpty()) {
                 System.out.println("Weather Data:");

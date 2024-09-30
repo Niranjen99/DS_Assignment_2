@@ -52,6 +52,7 @@ public class JsonUtils {
     public static Map<String, String> parseJSON(String jsonString) throws Exception {
         jsonString = jsonString.trim();
         if (!jsonString.startsWith("{") || !jsonString.endsWith("}")) {
+            //return null;
             throw new Exception("Invalid JSON format: Missing curly braces.");
         }
         Map<String, String> jsonMap = new HashMap<>();
@@ -60,11 +61,14 @@ public class JsonUtils {
         for (String pair : keyValuePairs) {
             String[] keyValue = pair.split(":(?=([^\"]*\"[^\"]*\")*[^\"]*$)", 2);
             if (keyValue.length != 2) {
+                //return null;
                 throw new Exception("Invalid JSON format: Malformed key-value pair.");
             }
-            String key = parseString(keyValue[0].trim());
-            String value = parseString(keyValue[1].trim());
-            jsonMap.put(key, value);
+        
+                String key = parseString(keyValue[0].trim());
+                String value = parseString(keyValue[1].trim());
+                jsonMap.put(key, value);
+            
         }
         return jsonMap;
     }

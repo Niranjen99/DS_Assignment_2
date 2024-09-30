@@ -29,3 +29,17 @@ If the client fails to connect to the server, it will automatically retry every 
 Acknowledgments
 
 I would like to acknowledge the use of generative AI (ChatGPT) in modifying and improving the data cleaning functions,  server recovery functions and making my own JSON parsers (JsonUtils.java) for this assignment. The assistance provided helped in enhancing the overall functionality and efficiency of the code.
+
+
+
+FeedBack for Draft
+
+
+- No testing seems to be implemented at this stage.
+- Please ensure thread safety when handling multiple requests at once. Consider using thread synchronization mechanisms like locks or concurrent data structures like ConcurrentHashMap
+
+
+Fix based on Feedback
+
+Added lock mechanism for handling put and get requests
+Written junit test suite which runs multiple tests endtoend

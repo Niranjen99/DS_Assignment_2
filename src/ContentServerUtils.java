@@ -63,7 +63,7 @@ public class ContentServerUtils {
                 success = true;
             } catch (IOException e) {
                 System.out.println("Error: Failed to connect or send data! Retrying...");
-                e.printStackTrace();
+                //e.printStackTrace(); //Commented to prevent extra printing
                 try {
                     Thread.sleep(RECONNECT_INTERVAL * 1000);
                 } catch (InterruptedException ie) {

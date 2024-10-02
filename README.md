@@ -44,4 +44,4 @@ FeedBack for Draft
 Fix based on Feedback
 
 Added lock mechanism for handling put and get requests
-Written junit test suite which runs multiple tests endtoend
+Written junit test suite which runs multiple tests endtoend (which contains functionality of aggregation server), Synchronisationtest for server and retryConnection test for ContentServer and GETClient

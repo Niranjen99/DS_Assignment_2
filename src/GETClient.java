@@ -59,8 +59,8 @@ public class GETClient {
                 getWeatherData();
                 success = true;
             } catch (IOException e) {
-                System.out.println("Error: Failed to connect or send data. Retrying...");
-                e.printStackTrace();
+                System.out.println("Error: Failed to connect!! Retrying...");
+                //e.printStackTrace();  //commented to prevent extra printings
                 try {
                     Thread.sleep(RECONNECT_INTERVAL * 1000);
                 } catch (InterruptedException ie) {
